@@ -69,12 +69,11 @@ http://forum.mysensors.org/topic/303/mqtt-broker-gateway
 #define RADIO_RX_LED_PIN    6  // Receive led pin
 #define RADIO_TX_LED_PIN    9  // the PCB, on board LED
 */
-#define NO_DHCP
-//#define USE_DHCP
 
+//#define USE_DHCP                                              //use only Iboard Pro
 
-#define INCLUSION_MODE_TIME 1 // Number of minutes inclusion mode is enabled
-#define INCLUSION_MODE_PIN  14 //A0 // Digital pin used for inclusion mode button
+#define INCLUSION_MODE_TIME 1                                   // Number of minutes inclusion mode is enabled
+#define INCLUSION_MODE_PIN  14                                  //A0 // Digital pin used for inclusion mode button
 
 #define RADIO_CE_PIN        3 // radio chip enable
 #define RADIO_SPI_SS_PIN    8  // radio SPI serial select
@@ -149,16 +148,13 @@ void writeEthernet(const char *writeBuffer, byte *writeSize) {
 
 int main(void) {
   init();
-  #ifdef NO_DHCP  
-  Ethernet.begin(TCP_MAC, TCP_IP);
-  #endif 
-  #ifdef USE_DHCP
-  //------------------------------------------------------------
-  if (Ethernet.begin(TCP_MAC) == 0) {
+  #ifdef USE_DHCP 
+   if (Ethernet.begin(TCP_MAC) == 0) {
     // initialize the ethernet device not using DHCP:
     Ethernet.begin(TCP_MAC, TCP_IP, TCP_GATEWAY, TCP_SUBNET);
-  }
-  //------------------------------------------------------------ 
+  } 
+   #else
+  Ethernet.begin(TCP_MAC, TCP_IP);
  #endif  
   delay(1000);   // Wait for Ethernet to get configured.
   gw.begin(RF24_PA_LEVEL_GW, RF24_CHANNEL, RF24_DATARATE, writeEthernet, RADIO_RX_LED_PIN, RADIO_TX_LED_PIN, RADIO_ERROR_LED_PIN);
