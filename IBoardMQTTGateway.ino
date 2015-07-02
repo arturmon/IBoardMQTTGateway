@@ -69,6 +69,10 @@ http://forum.mysensors.org/topic/303/mqtt-broker-gateway
 #define RADIO_RX_LED_PIN    6  // Receive led pin
 #define RADIO_TX_LED_PIN    9  // the PCB, on board LED
 */
+#define NO_DHCP
+//#define USE_DHCP
+
+
 #define INCLUSION_MODE_TIME 1 // Number of minutes inclusion mode is enabled
 #define INCLUSION_MODE_PIN  14 //A0 // Digital pin used for inclusion mode button
 
@@ -81,6 +85,10 @@ http://forum.mysensors.org/topic/303/mqtt-broker-gateway
 
 #define TCP_PORT 1883						// Set your MQTT Broker Listening port.
 IPAddress TCP_IP ( 192, 168, 1, 254 );				// Configure your static ip-address here
+#ifdef USE_DHCP
+IPAddress TCP_GATEWAY (192, 168, 1, 1);
+IPAddress TCP_SUBNET (255, 255, 0, 0);
+#endif
 byte TCP_MAC[] = { 0x02, 0xDE, 0xAD, 0x00, 0x00, 0x42 };	// Mac-address - You should change this! see note *2 above!
 
 //////////////////////////////////////////////////////////////////
@@ -141,7 +149,17 @@ void writeEthernet(const char *writeBuffer, byte *writeSize) {
 
 int main(void) {
   init();
+  #ifdef NO_DHCP  
   Ethernet.begin(TCP_MAC, TCP_IP);
+  #endif 
+  #ifdef USE_DHCP
+  //------------------------------------------------------------
+  if (Ethernet.begin(TCP_MAC) == 0) {
+    // initialize the ethernet device not using DHCP:
+    Ethernet.begin(TCP_MAC, TCP_IP, TCP_GATEWAY, TCP_SUBNET);
+  }
+  //------------------------------------------------------------ 
+ #endif  
   delay(1000);   // Wait for Ethernet to get configured.
   gw.begin(RF24_PA_LEVEL_GW, RF24_CHANNEL, RF24_DATARATE, writeEthernet, RADIO_RX_LED_PIN, RADIO_TX_LED_PIN, RADIO_ERROR_LED_PIN);
   server.begin();
